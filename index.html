@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ER Diagram - Gamification Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .diagram-container {
+            padding: 40px;
+            overflow-x: auto;
+            background: #f8f9fa;
+        }
+
+        .diagram-wrapper {
+            min-width: 1700px;
+            height: 1100px;
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .table-entity {
+            position: absolute;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .table-entity:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            z-index: 100 !important;
+        }
+
+        .table-header {
+            padding: 12px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .table-body {
+            padding: 15px;
+            background: white;
+        }
+
+        .table-row {
+            padding: 5px 0;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .pk {
+            font-weight: bold;
+            color: #d97706;
+        }
+
+        .fk {
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        /* Table specific colors */
+        .panchayats .table-header { background: #3b82f6; }
+        .panchayats { border: 3px solid #3b82f6; }
+
+        .users .table-header { background: #f59e0b; }
+        .users { border: 3px solid #f59e0b; }
+
+        .categories .table-header { background: #a855f7; }
+        .categories { border: 3px solid #a855f7; }
+
+        .tasks .table-header { background: #22c55e; }
+        .tasks { border: 3px solid #22c55e; }
+
+        .user-tasks .table-header { background: #ef4444; }
+        .user-tasks { border: 3px solid #ef4444; }
+
+        .badges .table-header { background: #eab308; }
+        .badges { border: 3px solid #eab308; }
+
+        .user-badges .table-header { background: #6366f1; }
+        .user-badges { border: 3px solid #6366f1; }
+
+        .levels .table-header { background: #f43f5e; }
+        .levels { border: 3px solid #f43f5e; }
+
+        .user-statistics .table-header { background: #06b6d4; }
+        .user-statistics { border: 3px solid #06b6d4; }
+
+        /* Positioning - Fixed to prevent overlap */
+        .panchayats { 
+            top: 30px; 
+            left: 50px; 
+            width: 220px; 
+            z-index: 10;
+        }
+        
+        .users { 
+            top: 280px; 
+            left: 50px; 
+            width: 220px; 
+            z-index: 10;
+        }
+        
+        .categories { 
+            top: 30px; 
+            left: 420px; 
+            width: 220px; 
+            z-index: 10;
+        }
+        
+        .tasks { 
+            top: 30px; 
+            left: 800px; 
+            width: 240px; 
+            z-index: 10;
+        }
+        
+        .user-tasks { 
+            top: 380px; 
+            left: 420px; 
+            width: 240px; 
+            z-index: 10;
+        }
+        
+        .badges { 
+            top: 380px; 
+            left: 800px; 
+            width: 240px; 
+            z-index: 10;
+        }
+        
+        .user-badges { 
+            top: 380px; 
+            left: 1200px; 
+            width: 220px; 
+            z-index: 10;
+        }
+        
+        .levels { 
+            top: 30px; 
+            left: 1200px; 
+            width: 240px; 
+            z-index: 10;
+        }
+        
+        .user-statistics { 
+            top: 680px; 
+            left: 50px; 
+            width: 240px; 
+            z-index: 10;
+        }
+
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .legend {
+            position: absolute;
+            background: #f0f9ff;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            top: 680px;
+            left: 1180px;
+            width: 320px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+
+        .legend h3 {
+            margin-bottom: 15px;
+            color: #1e40af;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .legend-item {
+            padding: 8px 0;
+            font-size: 13px;
+            color: #1e3a8a;
+        }
+
+        .legend-line {
+            display: inline-block;
+            width: 40px;
+            height: 2px;
+            background: #4b5563;
+            vertical-align: middle;
+            margin-right: 10px;
+            position: relative;
+        }
+
+        .legend-line::after {
+            content: '▶';
+            position: absolute;
+            right: -8px;
+            top: -8px;
+            font-size: 10px;
+            color: #4b5563;
+        }
+
+        .legend-line.dashed {
+            background: repeating-linear-gradient(
+                90deg,
+                #4b5563,
+                #4b5563 5px,
+                transparent 5px,
+                transparent 10px
+            );
+        }
+
+        .info-section {
+            background: #eff6ff;
+            padding: 30px;
+            margin: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .info-section h2 {
+            color: #1e40af;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .info-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-section li {
+            padding: 8px 0;
+            color: #1e3a8a;
+            border-bottom: 1px solid #bfdbfe;
+        }
+
+        .info-section li:last-child {
+            border-bottom: none;
+        }
+
+        .info-section strong {
+            color: #1e40af;
+        }
+
+        .relationship-label {
+            font-size: 11px;
+            font-weight: bold;
+            fill: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🗄️ Gamification Platform</h1>
+            <p>Entity Relationship Diagram - 3NF Compliant Schema</p>
+        </header>
+
+        <div class="diagram-container">
+            <div class="diagram-wrapper">
+                <svg width="1700" height="1100">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <polygon points="0 0, 10 3, 0 6" fill="#1e40af" />
+                        </marker>
+                    </defs>
+
+                    <!-- Relationships with corrected coordinates -->
+                    
+                    <!-- Users to Panchayats (M:1) -->
+                    <line x1="160" y1="280" x2="160" y2="230" stroke="#1e40af" stroke-width="2.5" marker-end="url(#arrowhead)"/>
+                    <text x="170" y="255" class="relationship-label">M:1</text>
+
+                    <!-- Users to User_Tasks (1:M) -->
+                    <line x1="270" y1="400" x2="420" y2="480" stroke="#1e40af" stroke-width="2.5" marker-end="url(#arrowhead)"/>
+                    <text x="330" y="430" class="relationship-label">1:M</text>
+
+                    <!-- Tasks to User_Tasks (1:M) -->
+                    <line x1="920" y1="290" x2="660" y2="450" stroke="#1e40af" stroke-width="2.5" marker-end="url(#arrowhead)"/>
+                    <text x="770" y="360" class="relationship-label">1:M</text>
+
+                    <!-- Categories to Tasks (1:M) -->
+                    <line x1="640" y1="130" x2="800" y2="130" stroke="#1e40af" stroke-width="2.5" marker-end="url(#arrowhead)"/>
+                    <text x="700" y="120" class="relationship-label">1:M</text>
+
+                    <!-- Categories to Badges (1:M) -->
+                    <line x1="530" y1="210" x2="530" y2="300" stroke="#1e40af" stroke-width="2.5"/>
+                    <line x1="530" y1="300" x2="800" y2="480" stroke="#1e40af" stroke-width="2.5" marker-end="url(#arrowhead)"/>
+                    <text x="640" y="350" class="relationship-label">1:M</text>
+
+                    <!-- Badges to User_Badges (1:M) -->
+                    <line x1="1040" y1="490" x2="1200" y2="490" stroke="#1e40af" stroke-width="2.5" marker-end="url(#arrowhead)"/>
+                    <text x="1100" y="480" class="relationship-label">1:M</text>
+
+                    <!-- Users to User_Badges (1:M) -->
+                    <line x1="270" y1="360" x2="1200" y2="440" stroke="#1e40af" stroke-width="2.5" stroke-dasharray="8,4" marker-end="url(#arrowhead)"/>
+                    <text x="700" y="390" class="relationship-label">M:N via junction</text>
+
+                    <!-- Users to User_Statistics (1:1) -->
+                    <line x1="160" y1="560" x2="160" y2="680" stroke="#1e40af" stroke-width="2.5" marker-end="url(#arrowhead)"/>
+                    <text x="170" y="620" class="relationship-label">1:1</text>
+
+                    <!-- User_Tasks verified_by to Users (self-reference) -->
+                    <path d="M 420 560 Q 340 620 270 480" stroke="#dc2626" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="4,3"/>
+                    <text x="310" y="590" class="relationship-label" fill="#dc2626">verifier</text>
+
+                    <!-- Tasks created_by to Users -->
+                    <path d="M 800 270 Q 500 310 270 350" stroke="#16a34a" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="4,3"/>
+                    <text x="480" y="300" class="relationship-label" fill="#16a34a">creator</text>
+                </svg>
+
+                <!-- Tables with fixed positions -->
+                <div class="table-entity panchayats">
+                    <div class="table-header">panchayats</div>
+                    <div class="table-body">
+                        <div class="table-row pk">🔑 panchayat_id (PK)</div>
+                        <div class="table-row">name</div>
+                        <div class="table-row">district</div>
+                        <div class="table-row">state</div>
+                        <div class="table-row">population</div>
+                        <div class="table-row">created_at</div>
+                    </div>
+                </div>
+
+                <div class="table-entity users">
+                    <div class="table-header">users</div>
+                    <div class="table-body">
+                        <div class="table-row pk">🔑 user_id (PK)</div>
+                        <div class="table-row">full_name</div>
+                        <div class="table-row">email</div>
+                        <div class="table-row">phone_number</div>
+                        <div class="table-row fk">🔗 panchayat_id (FK)</div>
+                        <div class="table-row">role</div>
+                        <div class="table-row">created_at</div>
+                        <div class="table-row">is_active</div>
+                    </div>
+                </div>
+
+                <div class="table-entity categories">
+                    <div class="table-header">categories</div>
+                    <div class="table-body">
+                        <div class="table-row pk">🔑 category_id (PK)</div>
+                        <div class="table-row">category_name</div>
+                        <div class="table-row">description</div>
+                        <div class="table-row">icon_url</div>
+                        <div class="table-row">created_at</div>
+                    </div>
+                </div>
+
+                <div class="table-entity tasks">
+                    <div class="table-header">tasks</div>
+                    <div class="table-body">
+                        <div class="table-row pk">🔑 task_id (PK)</div>
+                        <div class="table-row">title</div>
+                        <div class="table-row">description</div>
+                        <div class="table-row">base_points</div>
+                        <div class="table-row fk">🔗 category_id (FK)</div>
+                        <div class="table-row">verification_type</div>
+                        <div class="table-row">is_active</div>
+                        <div class="table-row">created_at</div>
+                        <div class="table-row fk">🔗 created_by (FK)</div>
+                    </div>
+                </div>
+
+                <div class="table-entity user-tasks">
+                    <div class="table-header">user_tasks</div>
+                    <div class="table-body">
+                        <div class="table-row pk">🔑 transaction_id (PK)</div>
+                        <div class="table-row fk">🔗 user_id (FK)</div>
+                        <div class="table-row fk">🔗 task_id (FK)</div>
+                        <div class="table-row">status</div>
+                        <div class="table-row">proof_url</div>
+                        <div class="table-row">points_awarded</div>
+                        <div class="table-row">submitted_at</div>
+                        <div class="table-row">verified_at</div>
+                        <div class="table-row fk">🔗 verified_by (FK)</div>
+                        <div class="table-row">rejection_reason</div>
+                    </div>
+                </div>
+
+                <div class="table-entity badges">
+                    <div class="table-header">badges</div>
+                    <div class="table-body">
+                        <div class="table-row pk">🔑 badge_id (PK)</div>
+                        <div class="table-row">name</div>
+                        <div class="table-row">description</div>
+                        <div class="table-row">icon_url</div>
+                        <div class="table-row fk">🔗 category_id (FK)</div>
+                        <div class="table-row">required_task_count</div>
+                        <div class="table-row">required_points</div>
+                        <div class="table-row">is_active</div>
+                        <div class="table-row">created_at</div>
+                    </div>
+                </div>
+
+                <div class="table-entity user-badges">
+                    <div class="table-header">user_badges</div>
+                    <div class="table-body">
+                        <div class="table-row pk">🔑 user_badge_id (PK)</div>
+                        <div class="table-row fk">🔗 user_id (FK)</div>
+                        <div class="table-row fk">🔗 badge_id (FK)</div>
+                        <div class="table-row">earned_at</div>
+                        <div class="table-row">notified</div>
+                    </div>
+                </div>
+
+                <div class="table-entity levels">
+                    <div class="table-header">levels</div>
+                    <div class="table-body">
+                        <div class="table-row pk">🔑 level_id (PK)</div>
+                        <div class="table-row">level_number</div>
+                        <div class="table-row">level_name</div>
+                        <div class="table-row">min_xp_required</div>
+                        <div class="table-row">max_xp_required</div>
+                        <div class="table-row">perks_description</div>
+                        <div class="table-row">created_at</div>
+                    </div>
+                </div>
+
+                <div class="table-entity user-statistics">
+                    <div class="table-header">user_statistics</div>
+                    <div class="table-body">
+                        <div class="table-row pk">🔑 user_id (PK, FK)</div>
+                        <div class="table-row">total_xp</div>
+                        <div class="table-row">current_level</div>
+                        <div class="table-row">tasks_completed</div>
+                        <div class="table-row">tasks_pending</div>
+                        <div class="table-row">tasks_rejected</div>
+                        <div class="table-row">last_updated</div>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <h3>📌 Legend</h3>
+                    <div class="legend-item">
+                        <span class="legend-line"></span> One-to-Many (1:M)
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-line dashed"></span> Many-to-Many (M:N)
+                    </div>
+                    <div class="legend-item" style="margin-top: 10px;">
+                        <strong>🔑</strong> Primary Key (PK)
+                    </div>
+                    <div class="legend-item">
+                        <strong>🔗</strong> Foreign Key (FK)
+                    </div>
+                    <div class="legend-item" style="margin-top: 10px; font-size: 11px; color: #475569;">
+                        <strong>Junction Tables:</strong><br>
+                        • user_tasks (Users ↔ Tasks)<br>
+                        • user_badges (Users ↔ Badges)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2>🔗 Key Relationships Explained</h2>
+            <ul>
+                <li><strong>Users ↔ Panchayats (M:1):</strong> Many users belong to one panchayat. Each user must be associated with a panchayat.</li>
+                <li><strong>Users ↔ Tasks (M:N via user_tasks):</strong> Many users can complete many tasks. The user_tasks junction table tracks submissions, status, and verification.</li>
+                <li><strong>Users ↔ Badges (M:N via user_badges):</strong> Many users can earn many badges. The user_badges junction table tracks when each badge was earned.</li>
+                <li><strong>Tasks ↔ Categories (M:1):</strong> Many tasks belong to one category (Water, Soil, Pest, Energy, etc.).</li>
+                <li><strong>Badges ↔ Categories (M:1):</strong> Many badges can be linked to one category - this is optional and helps organize badges by domain.</li>
+                <li><strong>Users ↔ User_Statistics (1:1):</strong> Each user has exactly one statistics record. This is denormalized for performance optimization in leaderboards.</li>
+                <li><strong>Self-References (Users table):</strong>
+                    <ul style="margin-left: 20px; margin-top: 5px;">
+                        <li>• Tasks have a <em>created_by</em> field linking to the admin user who created the task</li>
+                        <li>• User_tasks have a <em>verified_by</em> field linking to the verifier user who approved/rejected the submission</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="info-section" style="background: #fef3c7; border-left-color: #f59e0b;">
+            <h2>⚡ Database Triggers</h2>
+            <ul>
+                <li><strong>after_user_task_verified:</strong> When a task is verified, automatically update user_statistics (increment total_xp, tasks_completed) and check for level-ups and badge awards.</li>
+                <li><strong>after_user_task_rejected:</strong> When a task is rejected, increment tasks_rejected count in user_statistics.</li>
+                <li><strong>after_user_task_insert:</strong> When a new task submission is created, increment tasks_pending count in user_statistics.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
